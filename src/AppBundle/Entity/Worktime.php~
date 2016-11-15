@@ -1,0 +1,40 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: w33ky
+ * Date: 09.11.16
+ * Time: 02:56
+ */
+
+namespace AppBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="worktime")
+ */
+class Worktime
+{
+    /**
+     * @ORM\Column(type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $workday;
+
+    /**
+     * @ORM\Column(type="time")
+     */
+    private $time_from;
+
+    /**
+     * @ORM\Column(type="time")
+     */
+    private $time_to;
+}

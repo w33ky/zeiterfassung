@@ -1,0 +1,12 @@
+<html>
+    <head>
+        <title>CSV Test</title>
+    </head>
+    <body>
+    {% for array in data %}
+        {% for item in array %}
+            {{ item }}<br/>
+        {% endfor %}
+    {% endfor %}
+    </body>
+</html>
