@@ -9,6 +9,7 @@
 namespace AppBundle;
 
 use AppBundle\Entity\Person;
+use AppBundle\Entity\Property;
 use AppBundle\Entity\Workday;
 use AppBundle\Entity\Worktime;
 use Doctrine\ORM\EntityManager;
@@ -17,6 +18,27 @@ use Doctrine\ORM\EntityManager;
 class CsvHandler
 {
     function loadCSV(EntityManager $em) {
+        //check if timelog has changed since last time
+        $repository = $em->getRepository('AppBundle:Property');
+        $md5sum = md5_file("timelog.csv");
+        $property = $repository->find('md5sum');
+        if ($property == null) {
+            $property_new = new Property();
+            $property_new->setId('md5sum');
+            $property_new->setValue($md5sum);
+            $em->persist($property_new);
+            $em->flush();
+        }
+        else {
+            //skip if md5sum matches
+            if ($md5sum == $property->getValue()) return;
+            else {
+                $property->setValue($md5sum);
+                $em->persist($property);
+                $em->flush();
+            }
+        }
+
         //load data from file
         $csv = [];
         if (($handle = fopen("timelog.csv", "r")) !== FALSE) {
