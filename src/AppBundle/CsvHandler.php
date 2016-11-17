@@ -11,42 +11,41 @@ namespace AppBundle;
 use AppBundle\Entity\Person;
 use AppBundle\Entity\Workday;
 use AppBundle\Entity\Worktime;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\ORM\EntityManager;
 
 
 class CsvHandler
 {
-    function loadCSV($em) {
+    function loadCSV(EntityManager $em) {
         //load data from file
-        $csv = array();
+        $csv = [];
         if (($handle = fopen("timelog.csv", "r")) !== FALSE) {
             while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
-                array_push($csv, $data);
+                $csv[] = $data;
             }
             fclose($handle);
         }
 
         //clean dataset
-        $new_csv = array();
+        $new_csv = [];
         foreach ($csv as $array) {
-            $new_array = array();
+            $new_array = [];
             $pos = 1;
             foreach ($array as $item) {
                 if ($item != '' && $pos != 1) {
-                    array_push($new_array, $item);
+                    $new_array[] = $item;
                 }
                 $pos++;
             }
-            array_push($new_csv, $new_array);
+            $new_csv[] = $new_array;
         }
         $csv = $new_csv;
 
         //write users into database
-        //$em = $this->getDoctrine()->getManager();
-        $users = array();
+        $users = [];
         foreach ($csv as $array) {
             if (!in_array($array[0], $users)) {
-                array_push($users, $array[0]);
+                $users[] = $array[0];
 
                 $check = $em->getRepository('AppBundle:Person')->find($array[0]);
 
@@ -64,10 +63,10 @@ class CsvHandler
         $repository = $em->getRepository('AppBundle:Workday');
         $repository2 = $em->getRepository('AppBundle:Worktime');
         foreach ($users as $user) {
-            $csv_by_user = array();
+            $csv_by_user = [];
             foreach ($csv as $item) {
-                if ($array[0] == $user) {
-                    array_push($csv_by_user, $item);
+                if ($item[0] == $user) {
+                    $csv_by_user[] = $item;
                 }
             }
 
