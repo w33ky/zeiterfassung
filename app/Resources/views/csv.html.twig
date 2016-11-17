@@ -1,12 +1,10 @@
-<html>
-    <head>
-        <title>CSV Test</title>
-    </head>
-    <body>
-    {% for array in data %}
-        {% for item in array %}
-            {{ item }}<br/>
-        {% endfor %}
+{% extends 'base.html.twig' %}
+
+{% block title %} Zeiterfassung {% endblock %}
+
+{% block body %}
+    Anwesenheit:<br>
+    {% for user in users %}
+        {{ user.getID() }} {{ user.getName() }}<br>
     {% endfor %}
-    </body>
-</html>
+{% endblock %}

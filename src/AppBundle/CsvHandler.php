@@ -11,10 +11,12 @@ namespace AppBundle;
 use AppBundle\Entity\Person;
 use AppBundle\Entity\Workday;
 use AppBundle\Entity\Worktime;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+
 
 class CsvHandler
 {
-    function loadCSV() {
+    function loadCSV($em) {
         //load data from file
         $csv = array();
         if (($handle = fopen("timelog.csv", "r")) !== FALSE) {
@@ -40,13 +42,13 @@ class CsvHandler
         $csv = $new_csv;
 
         //write users into database
-        $em = $this->getDoctrine()->getManager();
+        //$em = $this->getDoctrine()->getManager();
         $users = array();
         foreach ($csv as $array) {
             if (!in_array($array[0], $users)) {
                 array_push($users, $array[0]);
 
-                $check = $this->getDoctrine()->getRepository('AppBundle:Person')->find($array[0]);
+                $check = $em->getRepository('AppBundle:Person')->find($array[0]);
 
                 if ($check == null) {
                     $person = new Person();
@@ -59,8 +61,8 @@ class CsvHandler
         $em->flush();
 
         //write timestamps into database
-        $repository = $this->getDoctrine()->getRepository('AppBundle:Workday');
-        $repository2 = $this->getDoctrine()->getRepository('AppBundle:Worktime');
+        $repository = $em->getRepository('AppBundle:Workday');
+        $repository2 = $em->getRepository('AppBundle:Worktime');
         foreach ($users as $user) {
             $csv_by_user = array();
             foreach ($csv as $item) {

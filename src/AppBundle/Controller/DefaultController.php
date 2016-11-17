@@ -5,6 +5,8 @@ namespace AppBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use AppBundle\CsvHandler;
+
 
 class DefaultController extends Controller
 {
@@ -13,9 +15,13 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
-        // replace this example code with whatever you need
-        return $this->render('default/index.html.twig', [
-            'base_dir' => realpath($this->getParameter('kernel.root_dir').'/..').DIRECTORY_SEPARATOR,
-        ]);
+        $em = $this->getDoctrine()->getManager();
+        $csvHandler = new CsvHandler();
+        $csvHandler->loadCSV($em);
+
+        $repository = $em->getRepository('AppBundle:Person');
+        $users = $repository->findAll();
+
+        return $this->render('csv.html.twig', array('users' => $users));
     }
 }
