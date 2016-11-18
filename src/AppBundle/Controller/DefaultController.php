@@ -44,11 +44,19 @@ class DefaultController extends Controller
         foreach ($workdays as $workday) {
             $worktimes = $repository_worktime->findBy(array('workday' => $workday->getId()));
             $time = 0;
+            $dt_max = null;
+            $dt_min = null;
             /* @var $worktime \AppBundle\Entity\Worktime */
             foreach ($worktimes as $worktime) {
                 $time_from = $worktime->getTimeFrom();
                 $time_to = $worktime->getTimeTo();
                 $time += $time_to->getTimestamp() - $time_from->getTimestamp();
+
+                if ($dt_min == null) $dt_min = $time_from;
+                if ($dt_max == null) $dt_max = $time_to;
+
+                if($dt_min > $time_from) $dt_min = $time_from;
+                if($dt_max < $time_to) $dt_max = $time_to;
             }
             $dt_from = new \DateTime();
             $dt_from->setTimestamp(0);
@@ -56,6 +64,8 @@ class DefaultController extends Controller
             $dt_to->setTimestamp($time);
             $diff = $dt_from->diff($dt_to);
             $time_string = $diff->format('%h:%I');
+            $time_string_max = $dt_max->format('H:i');
+            $time_string_min = $dt_min->format('H:i');
 
             $workday_container = new WorkdayContainer();
             $workday_container->workday_date = $workday->getDate()->format('d.m.Y');
@@ -65,6 +75,8 @@ class DefaultController extends Controller
             $workday_container->notes = $workday->getNote();
             $workday_container->sick = $workday->getSick();
             $workday_container->vacation = $workday->getVacation();
+            $workday_container->worked_from = $time_string_min;
+            $workday_container->worked_to = $time_string_max;
 
             $workday_data[] = $workday_container;
         }
