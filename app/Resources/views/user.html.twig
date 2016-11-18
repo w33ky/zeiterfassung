@@ -8,12 +8,14 @@
         <thead>
             <tr>
                 <th>Tag</th>
+                <th>Arbeitszeit</th>
             </tr>
         </thead>
         <tbody>
-        {% for workday in workdays %}
+        {% for data in workday_data %}
             <tr>
-                <td>{{ workday.getDate().format('d.m.Y') }}</td>
+                <td>{{ data[0].getDate().format('d.m.Y') }}</td>
+                <td>{{ data[1] }}</td>
             </tr>
         {% endfor %}
         </tbody>
