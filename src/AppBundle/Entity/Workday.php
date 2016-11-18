@@ -39,9 +39,14 @@ class Workday
     private $note;
 
     /**
-     * @ORM\Column(type="string", length=10)
+     * @ORM\Column(type="boolean")
      */
-    private $sick_or_vacation;
+    private $sick;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $vacation;
 
     /**
      * Get id
@@ -126,26 +131,36 @@ class Workday
     }
 
     /**
-     * Set sickOrVacation
-     *
-     * @param string $sickOrVacation
-     *
-     * @return Workday
+     * @return mixed
      */
-    public function setSickOrVacation($sickOrVacation)
+    public function getSick()
     {
-        $this->sick_or_vacation = $sickOrVacation;
-
-        return $this;
+        return $this->sick;
     }
 
     /**
-     * Get sickOrVacation
-     *
-     * @return string
+     * @param mixed $sick
      */
-    public function getSickOrVacation()
+    public function setSick($sick)
     {
-        return $this->sick_or_vacation;
+        $this->sick = $sick;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getVacation()
+    {
+        return $this->vacation;
+    }
+
+    /**
+     * @param mixed $vacation
+     */
+    public function setVacation($vacation)
+    {
+        $this->vacation = $vacation;
+    }
+
+
 }

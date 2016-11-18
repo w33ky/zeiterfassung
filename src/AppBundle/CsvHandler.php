@@ -119,7 +119,8 @@ class CsvHandler
                     $workday->setPerson($user);
                     $workday->setDate($dt_date);
                     $workday->setNote('');
-                    $workday->setSickOrVacation('');
+                    $workday->setSick(false);
+                    $workday->setVacation(false);
                     $em->persist($workday);
                     $em->flush();
                     $workday = $repository->findOneBy(array('person' => $user, 'date' => $dt_date));

@@ -4,21 +4,26 @@
 
 {% block body %}
     <h1>vorhandene Nutzer:</h1>
-    <table class="table table-hover">
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>Nutzer ID</th>
                 <th>Name</th>
+                <th>Aktionen</th>
             </tr>
         </thead>
         <tbody>
         {% for user in users %}
-            <tr onclick="location.href='/user/{{ user.getID() }}';">
+            <tr>
                 <td>
                     {{ user.getID() }}
                 </td>
                 <td>
                     {{ user.getName() }}
+                </td>
+                <td>
+                    <button type="button" class="btn btn-default" onclick="location.href='/user/{{ user.getID() }}';">Arbeitszeiten</button>
+                    <button type="button" class="btn btn-default" onclick="location.href='/useredit/{{ user.getID() }}';">Nutzer bearbeiten</button>
                 </td>
             </tr>
         {% endfor %}

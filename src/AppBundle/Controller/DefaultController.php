@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Container\WorkdayContainer;
 use AppBundle\Entity\Worktime;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -39,6 +40,7 @@ class DefaultController extends Controller
         $workdays = $repository_workday->findBy(array('person' => $user_id));
 
         $workday_data = [];
+        /* @var $workday \AppBundle\Entity\Workday */
         foreach ($workdays as $workday) {
             $worktimes = $repository_worktime->findBy(array('workday' => $workday->getId()));
             $time = 0;
@@ -54,9 +56,31 @@ class DefaultController extends Controller
             $dt_to->setTimestamp($time);
             $diff = $dt_from->diff($dt_to);
             $time_string = $diff->format('%h:%I');
-            $workday_data[] = [$workday, $time_string];
+
+            $workday_container = new WorkdayContainer();
+            $workday_container->workday_date = $workday->getDate()->format('d.m.Y');
+            $workday_container->worked_time = $time_string;
+            $workday_container->worked_from = '??:??';
+            $workday_container->worked_to = '??:??';
+            $workday_container->notes = $workday->getNote();
+            $workday_container->sick = $workday->getSick();
+            $workday_container->vacation = $workday->getVacation();
+
+            $workday_data[] = $workday_container;
         }
 
         return $this->render('user.html.twig', array('user' => $user, 'workday_data' => $workday_data));
+    }
+
+    /**
+     * @Route("/useredit/{user_id}", name="useredit")
+     */
+    public function userEditAction($user_id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $repository_user = $em->getRepository('AppBundle:Person');
+        $user = $repository_user->find($user_id);
+
+        return $this->render('useredit.html.twig', array('user' => $user, 'workday_data'));
     }
 }
