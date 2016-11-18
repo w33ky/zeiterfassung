@@ -13,7 +13,7 @@
         </thead>
         <tbody>
         {% for user in users %}
-            <tr>
+            <tr onclick="location.href='/user/{{ user.getID() }}';">
                 <td>
                     {{ user.getID() }}
                 </td>

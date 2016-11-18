@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Arbeitszeiten {{ user.getName() }} {% endblock %}
+
+{% block body %}
+    <h1>{{ user.getName() }}</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Tag</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for workday in workdays %}
+            <tr>
+                <td>{{ workday.getDate().format('d.m.Y') }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
