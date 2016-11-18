@@ -3,8 +3,25 @@
 {% block title %} Zeiterfassung {% endblock %}
 
 {% block body %}
-    Anwesenheit:<br>
-    {% for user in users %}
-        {{ user.getID() }} {{ user.getName() }}<br>
-    {% endfor %}
+    <h1>vorhandene Nutzer:</h1>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Nutzer ID</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            <tr>
+                <td>
+                    {{ user.getID() }}
+                </td>
+                <td>
+                    {{ user.getName() }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
