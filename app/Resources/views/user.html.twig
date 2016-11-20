@@ -11,7 +11,7 @@
     <button type="button" class="btn btn-default" onclick="location.href='/user/{{ user.getId() }}/{{ year+1 }}/{{ month }}';">nächstes Jahr</button>
 
     <form action="/user/{{ user.getId() }}/{{ year }}/{{ month }}" method="post">
-        <table class="table table-striped">
+        <table class="table">
             <thead>
                 <tr>
                     <th>Tag</th>
@@ -22,19 +22,21 @@
             </thead>
             <tbody>
             {% for data in workday_data %}
-                <tr>
+                <tr {% if data.color == 0 %} style="background-color: #d0e9c6" {% endif %}
+                        {% if data.color == 1 %} style="background-color: #e7c3c3" {% endif %}
+                        {% if data.color == 2 %} style="background-color: #999999" {% endif %}>
                     <td>{{ data.workday_date }}</td>
                     <td>von {{ data.worked_from }} bis {{ data.worked_to }}, insgesamt {{ data.worked_time }}</td>
                     <td><textarea class="form-control" rows="2" id="comment" name="comment">{{ data.notes }}</textarea></td>
                     <td>
-                        <label class="checkbox-inline"><input type="checkbox" value="" name="urlaub">Urlaub</label>
-                        <label class="checkbox-inline"><input type="checkbox" value="" name="krank">Krank</label>
+                        <label class="checkbox-inline"><input type="checkbox" value="" name="urlaub" {% if data.vacation %} checked {% endif %}>Urlaub</label>
+                        <label class="checkbox-inline"><input type="checkbox" value="" name="krank" {% if data.sick %} checked {% endif %}>Krank</label>
                     </td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
         <button type="submit" class="btn btn-primary">Speichern</button>
-        <button type="button" class="btn btn-danger" onclick="location.href='/';">zurück zur Übersicht</button>
+        <button type="button" class="btn btn-danger" onclick="location.href='/';">Zurück</button>
     </form>
 {% endblock %}
