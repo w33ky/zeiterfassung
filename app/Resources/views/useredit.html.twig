@@ -3,12 +3,21 @@
 {% block title %} {{ user.getName() }} bearbeiten {% endblock %}
 
 {% block body %}
-    <div class="form-group">
-        <label for="usr">Name:</label>
-        <input type="text" class="form-control" id="usr" value="{{ user.getName() }}">
-        <label for="usr">E-Mail:</label>
-        <input type="text" class="form-control" id="email" value="">
-    </div>
-    <button type="button" class="btn btn-primary">Speichern</button>
-    <button type="button" class="btn btn-danger" onclick="location.href='/'";>Abbrechen</button>
+    {% if changed %}
+        <div class="alert alert-success">
+            Nutzer erfolgreich aktualisiert.
+        </div>
+    {% endif %}
+    <form action="/useredit/{{ user.getId() }}" method="post">
+        <div class="form-group">
+            <label for="user">Name:</label>
+            <input type="text" class="form-control" id="user" name="user" value="{{ user.getName() }}">
+        </div>
+        <div class="form-group">
+            <label for="email">E-Mail:</label>
+            <input type="text" class="form-control" id="email" name="email" value="{{ user.getEmail }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Speichern</button>
+        <button type="button" class="btn btn-danger" onclick="location.href='/';">Abbrechen</button>
+    </form>
 {% endblock %}

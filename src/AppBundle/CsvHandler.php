@@ -75,6 +75,7 @@ class CsvHandler
                     $person = new Person();
                     $person->setId($array[0]);
                     $person->setName("Test Person " . count($users));
+                    $person->setEmail('');
                     $em->persist($person);
                 }
             }

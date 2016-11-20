@@ -32,6 +32,18 @@ class DefaultController extends Controller
      */
     public function userAction($user_id)
     {
+        $date = new \DateTime();
+        $year = $date->format('Y');
+        $month = $date->format('m');
+
+        return $this->userAction_date($user_id, $year, $month);
+    }
+
+    /**
+     * @Route("/user/{user_id}/{year}/{month}", name="user_date")
+     */
+    public function userAction_date($user_id, $year, $month)
+    {
         $em = $this->getDoctrine()->getManager();
         $repository_user = $em->getRepository('AppBundle:Person');
         $repository_workday = $em->getRepository('AppBundle:Workday');
@@ -81,18 +93,34 @@ class DefaultController extends Controller
             $workday_data[] = $workday_container;
         }
 
-        return $this->render('user.html.twig', array('user' => $user, 'workday_data' => $workday_data));
+        return $this->render('user.html.twig', array('user' => $user, 'workday_data' => $workday_data, 'year' => $year, 'month' => $month));
     }
 
     /**
      * @Route("/useredit/{user_id}", name="useredit")
      */
-    public function userEditAction($user_id)
+    public function userEditAction(Request $request, $user_id)
     {
         $em = $this->getDoctrine()->getManager();
         $repository_user = $em->getRepository('AppBundle:Person');
         $user = $repository_user->find($user_id);
+        $changed = false;
 
-        return $this->render('useredit.html.twig', array('user' => $user, 'workday_data'));
+        $username = $request->get('user');
+        $email = $request->get('email');
+
+        if ($username != null) {
+            $user->setName($username);
+            $changed = true;
+        }
+
+        if ($email != null) {
+            $user->setEmail($email);
+            $changed = true;
+        }
+
+        $em->flush();
+
+        return $this->render('useredit.html.twig', array('user' => $user, 'changed' => $changed));
     }
 }

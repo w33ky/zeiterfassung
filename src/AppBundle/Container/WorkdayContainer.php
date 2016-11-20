@@ -18,4 +18,6 @@ class WorkdayContainer
     public $notes;
     public $sick;
     public $vacation;
+    public $empty;
+    public $color;
 }
