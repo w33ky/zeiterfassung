@@ -9,6 +9,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use AppBundle\CsvHandler;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Validator\Constraints\DateTime;
 
 
 class DefaultController extends Controller
@@ -43,7 +44,7 @@ class DefaultController extends Controller
     /**
      * @Route("/user/{user_id}/{year}/{month}", name="user_date")
      */
-    public function userAction_date($user_id, $year, $month)
+    public function userAction_date(Request $request, $user_id, $year, $month)
     {
         $em = $this->getDoctrine()->getManager();
         $repository_user = $em->getRepository('AppBundle:Person');
@@ -60,6 +61,32 @@ class DefaultController extends Controller
         }
 
         $days_in_month = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        $changed = false;
+        $post_id = $request->get('day');
+        if ($post_id != null) {
+            $changed = true;
+            $update_date = new \DateTime();
+            $update_date->setDate($year, $month, $post_id);
+
+            $workday = $repository_workday->findOneBy(array('person' => $user_id, 'date' => $update_date));
+            if ($workday == null) {
+                $workday = new Workday();
+                $workday->setDate($update_date);
+                $workday->setPerson($user_id);
+
+                $em->persist($workday);
+            }
+            if ($request->get('comment') != null) $workday->setNote($request->get('comment'));
+            else $workday->setNote('');
+
+            if ($request->get('vacation') != null) $workday->setVacation(true);
+            else $workday->setVacation(false);
+
+            if ($request->get('sick') != null) $workday->setSick(true);
+            else $workday->setSick(false);
+
+            $em->flush();
+        }
 
         //TODO: custom SQL query
         $workdays = $repository_workday->findBy(array('person' => $user_id));
@@ -75,45 +102,44 @@ class DefaultController extends Controller
             /* @var $workday \AppBundle\Entity\Workday */
             foreach ($workdays as $workday) {
                 if ($workday->getDate()->format('d-m-Y') == $day->format('d-m-Y')) {
-                    $found_day = true;
-
                     $worktimes = $repository_worktime->findBy(array('workday' => $workday->getId()));
-                    $time = 0;
-                    $dt_max = null;
-                    $dt_min = null;
-                    /* @var $worktime \AppBundle\Entity\Worktime */
-                    foreach ($worktimes as $worktime) {
-                        $time_from = $worktime->getTimeFrom();
-                        $time_to = $worktime->getTimeTo();
-                        $time += $time_to->getTimestamp() - $time_from->getTimestamp();
+                    if (count($worktimes) > 0) {
+                        $found_day = true;
+                        $time = 0;
+                        $dt_max = null;
+                        $dt_min = null;
+                        /* @var $worktime \AppBundle\Entity\Worktime */
+                        foreach ($worktimes as $worktime) {
+                            $time_from = $worktime->getTimeFrom();
+                            $time_to = $worktime->getTimeTo();
+                            $time += $time_to->getTimestamp() - $time_from->getTimestamp();
 
-                        if ($dt_min == null) $dt_min = $time_from;
-                        if ($dt_max == null) $dt_max = $time_to;
+                            if ($dt_min == null) $dt_min = $time_from;
+                            if ($dt_max == null) $dt_max = $time_to;
 
-                        if($dt_min > $time_from) $dt_min = $time_from;
-                        if($dt_max < $time_to) $dt_max = $time_to;
+                            if ($dt_min > $time_from) $dt_min = $time_from;
+                            if ($dt_max < $time_to) $dt_max = $time_to;
+                        }
+                        $dt_from = new \DateTime();
+                        $dt_from->setTimestamp(0);
+                        $dt_to = new \DateTime();
+                        $dt_to->setTimestamp($time);
+                        $diff = $dt_from->diff($dt_to);
+                        $time_string = $diff->format('%h:%I');
+                        $time_string_max = $dt_max->format('H:i');
+                        $time_string_min = $dt_min->format('H:i');
+
+                        $workday_container = new WorkdayContainer();
+                        $workday_container->workday_date = $workday->getDate()->format('d.m.Y');
+                        $workday_container->worked_time = $time_string;
+                        $workday_container->worked_from = $time_string_min;
+                        $workday_container->worked_to = $time_string_max;
+                        $workday_container->color = 0;
+                        $workday_container->empty = false;
                     }
-                    $dt_from = new \DateTime();
-                    $dt_from->setTimestamp(0);
-                    $dt_to = new \DateTime();
-                    $dt_to->setTimestamp($time);
-                    $diff = $dt_from->diff($dt_to);
-                    $time_string = $diff->format('%h:%I');
-                    $time_string_max = $dt_max->format('H:i');
-                    $time_string_min = $dt_min->format('H:i');
-
-                    $workday_container = new WorkdayContainer();
-                    $workday_container->workday_date = $workday->getDate()->format('d.m.Y');
-                    $workday_container->worked_time = $time_string;
-                    $workday_container->worked_from = '??:??';
-                    $workday_container->worked_to = '??:??';
                     $workday_container->notes = $workday->getNote();
                     $workday_container->sick = $workday->getSick();
                     $workday_container->vacation = $workday->getVacation();
-                    $workday_container->worked_from = $time_string_min;
-                    $workday_container->worked_to = $time_string_max;
-                    $workday_container->color = 0;
-                    $workday_container->empty = false;
                 }
             }
 
@@ -122,7 +148,6 @@ class DefaultController extends Controller
                 $workday_container->empty = true;
                 $numeric_day = $day->format('w');
                 if ($numeric_day == 0 || $numeric_day == 6) {
-                    //Weekend
                     $workday_container->color = 2;
                 }
                 else $workday_container->color = 1;
@@ -131,7 +156,7 @@ class DefaultController extends Controller
             $workday_data[$i] = $workday_container;
         }
 
-        return $this->render('user.html.twig', array('user' => $user, 'workday_data' => $workday_data, 'year' => $year, 'month' => $month));
+        return $this->render('user.html.twig', array('user' => $user, 'workday_data' => $workday_data, 'year' => $year, 'month' => $month, 'changed' => $changed));
     }
 
     /**

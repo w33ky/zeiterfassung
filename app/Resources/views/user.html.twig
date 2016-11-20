@@ -4,39 +4,56 @@
 
 {% block body %}
     <h1>{{ user.getName() }}</h1>
+    {% if changed %}
+        <div class="alert alert-success">
+            Arbeitstag erfolgreich aktualisiert.
+        </div>
+    {% endif %}
     Zeitraum {{ year }} / {{ month }}<br>
     <button type="button" class="btn btn-default" onclick="location.href='/user/{{ user.getId() }}/{{ year }}/{{ month-1 }}';">letzter Monat</button>
     <button type="button" class="btn btn-default" onclick="location.href='/user/{{ user.getId() }}/{{ year }}/{{ month+1 }}';">nächster Monat</button>
     <button type="button" class="btn btn-default" onclick="location.href='/user/{{ user.getId() }}/{{ year-1 }}/{{ month }}';">letztes Jahr</button>
     <button type="button" class="btn btn-default" onclick="location.href='/user/{{ user.getId() }}/{{ year+1 }}/{{ month }}';">nächstes Jahr</button>
 
-    <form action="/user/{{ user.getId() }}/{{ year }}/{{ month }}" method="post">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Tag</th>
-                    <th>Arbeitszeit</th>
-                    <th>Notizen</th>
-                    <th>Anderes</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for data in workday_data %}
-                <tr {% if data.color == 0 %} style="background-color: #d0e9c6" {% endif %}
-                        {% if data.color == 1 %} style="background-color: #e7c3c3" {% endif %}
-                        {% if data.color == 2 %} style="background-color: #999999" {% endif %}>
-                    <td>{{ data.workday_date }}</td>
-                    <td>von {{ data.worked_from }} bis {{ data.worked_to }}, insgesamt {{ data.worked_time }}</td>
-                    <td><textarea class="form-control" rows="2" id="comment" name="comment">{{ data.notes }}</textarea></td>
-                    <td>
-                        <label class="checkbox-inline"><input type="checkbox" value="" name="urlaub" {% if data.vacation %} checked {% endif %}>Urlaub</label>
-                        <label class="checkbox-inline"><input type="checkbox" value="" name="krank" {% if data.sick %} checked {% endif %}>Krank</label>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        <button type="submit" class="btn btn-primary">Speichern</button>
-        <button type="button" class="btn btn-danger" onclick="location.href='/';">Zurück</button>
-    </form>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Tag</th>
+                <th>Arbeitszeit</th>
+                <th>Notizen</th>
+                <th>Anderes</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for data in workday_data %}
+            <tr {% if data.color == 0 %} style="background-color: #d0e9c6" {% endif %}
+                    {% if data.color == 1 %} style="background-color: #e7c3c3" {% endif %}
+                    {% if data.color == 2 %} style="background-color: #999999" {% endif %}>
+                <td>{{ data.workday_date }}</td>
+                <td>
+                    {% if data.color == 0 %}
+                        von {{ data.worked_from }} bis {{ data.worked_to }}, insgesamt {{ data.worked_time }}
+                    {% endif %}
+                </td>
+                <td>
+                    <form id="form{{ loop.index }}" action="/user/{{ user.getId() }}/{{ year }}/{{ month }}" method="post">
+                        <input type="hidden" name="day" value="{{ loop.index }}">
+                        <textarea class="form-control" rows="2" id="comment" name="comment">{{ data.notes }}</textarea>
+                    </form>
+                </td>
+                <td>
+                    {% if data.color == 1 %}
+                        <label class="checkbox-inline"><input form="form{{ loop.index }}" type="checkbox" value="true" name="vacation" {% if data.vacation %} checked {% endif %}>Urlaub</label>
+                        <label class="checkbox-inline"><input form="form{{ loop.index }}" type="checkbox" value="true" name="sick" {% if data.sick %} checked {% endif %}>Krank</label>
+                    {% endif %}
+                </td>
+                <td>
+                    <button form="form{{ loop.index }}" type="submit" class="btn btn-primary">Speichern</button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <button type="button" class="btn btn-danger" onclick="location.href='/';">Zurück</button>
 {% endblock %}
